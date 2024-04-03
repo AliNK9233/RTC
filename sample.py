@@ -15,9 +15,11 @@ def force_rtc():
     enc_key = enc_key_var.get()
     high_level_pwd = high_level_pwd_var.get()
     low_level_pwd = low_level_pwd_var.get()
-    rtc_minutes = rtc_minutes_var.get()
-    rtc_repetition = rtc_repetition_var.get()
+    rtc_minutes = rtc_duration_entry.get()
+    rtc_repetition = count_entry.get()
     rtc_duration = rtc_duration_var.get()
+
+    
 
     # Log the action
     log_text.insert(tk.END, f"RTC forcing initiated for COM port {com_port}\n")
@@ -25,6 +27,27 @@ def force_rtc():
     log_text.insert(tk.END, f"RTC Duration: {rtc_duration}\n")
     log_text.insert(tk.END, "-"*50 + "\n")
     log_text.see(tk.END)  # Scroll to the end of the log
+
+# Function to toggle visibility of date picker and time picker
+def toggle_widgets():
+    if radio_var.get() == 3:  # Manual radio button selected
+        date_label.grid(row=7, column=0, sticky=tk.W, padx=5, pady=5)
+        date_picker.grid(row=7, column=1, sticky=tk.W, padx=5, pady=5)
+        time_label.grid(row=8, column=0, sticky=tk.W, padx=5, pady=5)
+        time_entry.grid(row=8, column=1, sticky=tk.W, padx=5, pady=5)
+        rtc_duration_label.grid_forget()
+        rtc_duration_entry.grid_forget()
+        count_label.grid_forget()
+        count_entry.grid_forget()
+    else:
+        date_label.grid_forget()
+        date_picker.grid_forget()
+        time_label.grid_forget()
+        time_entry.grid_forget()
+        rtc_duration_label.grid(row=9, column=0, sticky=tk.W, padx=5, pady=5)
+        rtc_duration_entry.grid(row=9, column=1, padx=5, pady=5)
+        count_label.grid(row=10, column=0, sticky=tk.W, padx=5, pady=5)
+        count_entry.grid(row=10, column=1, padx=5, pady=5)
 
 root = tk.Tk()
 root.title("RTC Forcing Application")
@@ -65,19 +88,22 @@ ttk.Separator(root, orient='horizontal').grid(row=5, columnspan=2, sticky='ew', 
 radio_var = tk.IntVar()
 radio_var.set(1)  # Setting the default value
 
-radio1 = ttk.Radiobutton(root, text="Demand", variable=radio_var, value=1)
+radio1 = ttk.Radiobutton(root, text="Demand", variable=radio_var, value=1, command=toggle_widgets)
 radio1.grid(row=6, column=0, sticky=tk.W, padx=(5, 2), pady=5)
 
-radio2 = ttk.Radiobutton(root, text="Load Survey", variable=radio_var, value=2)
+radio2 = ttk.Radiobutton(root, text="Load Survey", variable=radio_var, value=2, command=toggle_widgets)
 radio2.grid(row=6, column=1, sticky=tk.W, padx=2, pady=5)
 
-radio3 = ttk.Radiobutton(root, text="Manual", variable=radio_var, value=3)
+radio3 = ttk.Radiobutton(root, text="Manual", variable=radio_var, value=3, command=toggle_widgets)
 radio3.grid(row=6, column=2, sticky=tk.E, padx=(2, 5), pady=5)
 
 
 # Date picker
 date_label = ttk.Label(root, text="Select Date:")
 date_label.grid(row=7, column=0, sticky=tk.W, padx=5, pady=5)
+
+date_picker = DateEntry(root)
+date_picker.grid(row=7, column=1, sticky=tk.W, padx=5, pady=5)
 
 # Time picker
 time_label = ttk.Label(root, text="Select Time (hh:mm:ss):")
@@ -90,26 +116,28 @@ time_entry.grid(row=8, column=1, sticky=tk.W, padx=5, pady=5)
 
 
 
-# rtc_repetition_label = ttk.Label(root, text="RTC Repetition:")
-# rtc_repetition_label.grid(row=8, column=0, sticky=tk.W)
-# rtc_repetition_var = tk.StringVar()
-# rtc_repetition_entry = ttk.Entry(root, textvariable=rtc_repetition_var)
-# rtc_repetition_entry.grid(row=8, column=1)
+# RTC Duration (min) entry
+rtc_duration_label = ttk.Label(root, text="RTC Duration (min)")
+rtc_duration_entry = ttk.Entry(root)
+rtc_duration_var = tk.StringVar()
+rtc_duration_entry = ttk.Entry(root, textvariable=rtc_duration_var)
 
-# rtc_duration_label = ttk.Label(root, text="RTC Duration:")
-# rtc_duration_label.grid(row=9, column=0, sticky=tk.W)
-# rtc_duration_var = tk.StringVar()
-# rtc_duration_entry = ttk.Entry(root, textvariable=rtc_duration_var)
-# rtc_duration_entry.grid(row=9, column=1)
+# Count entry
+count_label = ttk.Label(root, text="Count")
+count_entry = ttk.Entry(root)
+count_var = tk.StringVar()
+count_entry = ttk.Entry(root, textvariable=count_var)
 
-# force_button = ttk.Button(root, text="Force RTC", command=force_rtc)
-# force_button.grid(row=10, columnspan=2)
+toggle_widgets()
+
+force_button = ttk.Button(root, text="Start", command=force_rtc)
+force_button.grid(row=10,column=3,sticky=tk.E )  # Adjusted row to 8
 
 # Log window
 log_frame = ttk.Frame(root)
 log_frame.grid(row=11, column=0, columnspan=2, sticky=tk.NSEW)
 
-log_text = tk.Text(log_frame, height=10, width=50)
+log_text = tk.Text(log_frame, height=10,)
 log_text.grid(row=0, column=0, sticky=tk.NSEW)
 
 log_scroll = ttk.Scrollbar(log_frame, orient=tk.VERTICAL, command=log_text.yview)
