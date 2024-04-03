@@ -1,7 +1,9 @@
+import time
 import tkinter as tk
 from tkinter import ttk
 import serial.tools.list_ports
 from tkcalendar import DateEntry
+from datetime import datetime, timedelta
 
 def list_available_com_ports():
     com_ports = [port.device for port in serial.tools.list_ports.comports()]
@@ -9,17 +11,44 @@ def list_available_com_ports():
     if com_ports:
         com_port_combobox.set(com_ports[0])
 
-def force_rtc():
-    com_port = com_port_var.get()
-    auth_key = auth_key_var.get()
-    enc_key = enc_key_var.get()
-    high_level_pwd = high_level_pwd_var.get()
-    low_level_pwd = low_level_pwd_var.get()
-    rtc_minutes = rtc_duration_entry.get()
-    rtc_repetition = count_entry.get()
-    rtc_duration = rtc_duration_var.get()
+# def force_rtc():
+#     com_port = com_port_var.get()
+#     auth_key = auth_key_var.get()
+#     enc_key = enc_key_var.get()
+#     high_level_pwd = high_level_pwd_var.get()
+#     low_level_pwd = low_level_pwd_var.get()
+#     rtc_minutes = rtc_duration_entry.get()
+#     rtc_repetition = count_entry.get()
+#     rtc_duration = rtc_duration_var.get()
 
-    
+def force_rtc():
+    if radio_var.get() == 3:  # Manual radio button selected
+        current_rtc = datetime.now()
+        print("RTC from meter =", current_rtc)
+        new_date = date_picker.get_date()
+        new_time = time_entry.get()
+        print("\nNew RTC sending to meter:", new_date, new_time)
+        current_rtc = datetime.combine(new_date, datetime.strptime(new_time, "%H:%M:%S").time())
+        print("\nNew RTC from meter:", current_rtc)
+        print("\nCompleted")
+    elif radio_var.get() == 1:  # Demand radio button selected
+        for _ in range(int(count_entry.get())):
+            current_rtc = datetime.now()
+            print("RTC from meter =", current_rtc)
+            print("\nSending new RTC to meter")
+            current_rtc += timedelta(days=30) - timedelta(minutes=int(rtc_duration_entry.get()))
+            print("\nNew RTC from meter:", current_rtc)
+            time.sleep(int(rtc_duration_entry.get()) * 60)
+        print("\nCompleted")
+    elif radio_var.get() == 2:  # Load Survey radio button selected
+        for _ in range(int(count_entry.get())):
+            current_rtc = datetime.now()
+            print("RTC from meter =", current_rtc)
+            print("\nSending new RTC to meter")
+            current_rtc += timedelta(days=1)
+            print("\nNew RTC from meter:", current_rtc)
+            time.sleep(int(rtc_duration_entry.get()) * 60) 
+        print("\nCompleted")
 
     # Log the action
     log_text.insert(tk.END, f"RTC forcing initiated for COM port {com_port}\n")
